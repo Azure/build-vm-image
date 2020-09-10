@@ -1,0 +1,63 @@
+Name: "Build Azure Virtual Machine Image"
+Description: "Create custom virtual machine images that contain artifacts built in CI workflows" 
+inputs:
+   #general inputs
+   location:
+      description: 'This is the Azure region in which the Image Builder will run.'
+   resource-group-name:
+      description: 'This is the Resource Group where the temporary Imagebuilder Template resource will be created.'
+      required: true
+   image-builder-template-name:
+      description: 'The name of the image builder template resource to be used for creating and running the Image builder service.'
+   build-timeout-in-minutes:
+      description: 'The value is an integer which is used as timeout in minutes for running the image build.'
+      default: '240'
+   vm-size:
+      description: 'You can override the VM size, from the default value i.e. Standard_D1_v2.'
+      default: 'Standard_D1_v2'
+   managed-identity:
+      description: 'The identity that will be used to do the role assignment and resource creation'
+   
+   #source inputs
+   source-image-type:
+      description: '[ PlatformImage | SharedImageGallery | ManagedImage ]'
+      default: 'PlatformImage'
+   source-os-type: 
+      description: 'OS types supported: [ linux | windows ].'
+      required: true
+   source-image:
+      description: 'Value of source-image supported by Azure Image Builder.'
+      
+   #customization inouts
+   customizer-source:
+      description: 'This takes the path to a directory or a file in the runner. By default, it points to the default download directory of the github runner.'
+   customizer-script:
+      description: 'The customer can enter multi inline powershell or shell commands and use variables to point to directories inside the downloaded location.'
+   customizer-windows-update:
+      description: 'The value is boolean and set to false by default. This value is for Windows images only, the image builder will run Windows Update at the end of the customizations and also handle the reboots it requires.'
+      default: false
+     
+   #distribution inputs
+   dist-type:
+      description: 'ManagedImage | SharedImageGallery | VHD'
+      default: 'ManagedImage'
+   dist-resource-id:
+      description: 'Image Resource Id to be created by AIB'
+   dist-location:
+      description: 'location of Image created by AIB'
+   run-output-name:
+      description: 'Every Image builder run is identified with a unique run id.'
+   dist-image-tags:
+      description: 'The values set will be used to set the user defined tags on the custom image artifact created.'
+
+outputs:
+   imagebuilder-run-status:
+      description: 'This value of this output will be the value of Image builder Run status set to either Succeeded or Failed based on the runState returned by Azure Image Builder.'
+   run-output-name:
+      description: 'The action emits output value run-output-name which can be used to get the details of the Image Builder Run.'
+   custom-image-uri:
+      description: 'Upon successful completion, The github action emits the URI or resource id of the Image distributed.'
+
+runs:
+   using: 'node12'
+   main: 'lib/index.js'
