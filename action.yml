@@ -1,4 +1,4 @@
-Name: "Build Azure Virtual Machine Image"
+Name: 'Build Azure Virtual Machine Image'
 Description: "Create custom virtual machine images that contain artifacts built in CI workflows" 
 inputs:
    #general inputs
@@ -11,17 +11,17 @@ inputs:
       description: 'The name of the image builder template resource to be used for creating and running the Image builder service.'
    build-timeout-in-minutes:
       description: 'The value is an integer which is used as timeout in minutes for running the image build.'
-      default: '240'
+      default: 240
    vm-size:
       description: 'You can override the VM size, from the default value i.e. Standard_D1_v2.'
-      default: 'Standard_D1_v2'
+      default: Standard_D1_v2
    managed-identity:
       description: 'The identity that will be used to do the role assignment and resource creation'
    
    #source inputs
    source-image-type:
       description: '[ PlatformImage | SharedImageGallery | ManagedImage ]'
-      default: 'PlatformImage'
+      default: PlatformImage
    source-os-type: 
       description: 'OS types supported: [ linux | windows ].'
       required: true
@@ -40,7 +40,7 @@ inputs:
    #distribution inputs
    dist-type:
       description: 'ManagedImage | SharedImageGallery | VHD'
-      default: 'ManagedImage'
+      default: ManagedImage
    dist-resource-id:
       description: 'Image Resource Id to be created by AIB'
    dist-location:
