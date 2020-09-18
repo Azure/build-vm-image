@@ -193,6 +193,45 @@ jobs:
 The above workflow will use a linux platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image at default `customizer-destination` directory and run install-world.sh script. Finally it will distribute the baked custom image as a Managed Image(default distribution)
 
 
+### Sample workflow to create a custom Ubuntu OS image and distribute through Shared Image Gallery
+
+```yaml
+on: push
+
+jobs:
+  BUILD-CUSTOM-UBUNTU-IMAGE:
+    runs-on: ubuntu-latest    
+    steps:
+    - name: CHECKOUT
+      uses: actions/checkout@v2
+  
+
+    - name: AZURE LOGIN 
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+
+    - name: BUILD WEBAPP
+      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Run necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+      
+
+    - name: BUILD-CUSTOM-VM-IMAGE      
+      uses: azure/build-vm-image@v0
+      with:        
+        resource-group-name: 'myResourceGroup'
+        managed-identity: 'myImageBuilderIdentity'
+        location: 'eastus2'
+        source-os-type: 'linux'        
+        source-image: Canonical:UbuntuServer:18.04-LTS:latest      
+        customizer-script: |
+          sh /tmp/workflow-artifacts/install.sh
+        distributor-type: 'SharedImageGallery'
+        dist-resource-id: '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Compute/galleries/AppTeam/images/ImagesWithApp'
+        dist-location: 'eastus2'
+          
+        
+```
+The above workflow will use a linux platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image at default `customizer-destination` directory and run install.sh script. Finally it will distribute the baked custom image through Shared Image Gallery
 
 
 ## Configure credentials for Azure login action:
