@@ -145,7 +145,7 @@ jobs:
           & 'c:\workflow-artifacts\webApp\webconfig.ps1'
 
 ```
-The above workflow will use a Microsoft Windows Server platform image as base image, inject files present in directory ${{ GITHUB.WORKSPACE }}/worflow-artifacts of GitHub runner into the base image, run image customizations(E.g. Set up web server) using script webconfig.ps1, finally it will distribute the baked custom image as a Managed Image(default distribution)
+The above workflow will use a Microsoft Windows Server platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image, run image customizations(E.g. Set up IIS web server, configure bindings etc) using script webconfig.ps1, finally it will distribute the baked custom image as a Managed Image(default distribution)
 
 
 ### Sample workflow to create a custom Ubuntu OS image and distribute it as Managed Image 
@@ -165,8 +165,8 @@ jobs:
       run: |
         cd  "$GITHUB_WORKFLOW"
         mkdir worflow-artifacts/        
-        echo "echo Installing World... " > $GITHUB_WORKSPACE/workflow-artifacts/install-world.sh 
-        echo "echo Installing Universe... " > $GITHUB_WORKSPACE/workflow-artifacts/install-universe.sh
+        echo "echo Installing World... " > $GITHUB_WORKSPACE/workflow-artifacts/install-world.sh  # You can have your own installation script here
+
     
     - name: Login via Az module
       uses: azure/login@v1
@@ -187,10 +187,10 @@ jobs:
           sudo mkdir /buildArtifacts
           sudo cp -r /tmp/ /buildArtifacts/
           sh /buildArtifacts/workflow-artifacts/install-world.sh
-          sh /buildArtifacts/workflow-artifacts/install-world.sh
+
         
 ```
-The above workflow will use a linux platform image as base image, inject files present in directory ${{ GITHUB.WORKSPACE }}/worflow-artifacts of GitHub runner into the base image and build it. Finally it will distribute the custom image as a Managed Image(default distribution)
+The above workflow will use a linux platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image at default `customizer-destination` directory and run install-world.sh script. Finally it will distribute the baked custom image as a Managed Image(default distribution)
 
 
 
