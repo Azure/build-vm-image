@@ -1,0 +1,37 @@
+{
+  "name": "build-vm-image",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "main": "lib/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure/build-vm-image.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Azure/build-vm-image/issues"
+  },
+  "homepage": "https://github.com/Azure/build-vm-image#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/exec": "^1.0.4",
+    "@actions/io": "^1.0.2",
+    "@types/node": "^14.6.0",
+    "@types/q": "^1.5.4",
+    "archiver": "^5.0.0",
+    "azure-actions-webclient": "^1.0.11",
+    "azure-storage": "^2.10.3",
+    "eslint": "^5.16.0",
+    "jszip": "^3.5.0",
+    "tar.gz": "^1.0.7",
+    "typescript": "^3.9.7",
+    "zip-lib": "^0.7.1"
+  },
+  "devDependencies": {}
+}

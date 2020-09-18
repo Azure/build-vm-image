@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - "6"
+  - "8"
+  - "10"
+  - "11"
+
+after_script:
+  - npm run coveralls
+
+install:
+  - npm --version
+  - npm install
+
+allow_failures:
+  - node_js: "5"
+  - node_js: "7"
+
+sudo: false
