@@ -1,9 +1,9 @@
 # GitHub Action to Build Custom Virtual Machine Images
 
-With the Build Virtual Machine Image action, you can now easily create custom virtual machine images that contain artifacts produced in your CI/CD workflows and have pre-installed software.  This action not only lets you build customized images but also distribute them using image managing Azure services like [Shared Image Gallery](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/shared-image-galleries). These images can then be used for creating [Virtual Machines](https://azure.microsoft.com/en-in/services/virtual-machines/) or [Virtual Machine Scale Sets](https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview) 
+With the Build Azure Virtual Machine Image action, you can now easily create custom virtual machine images that contain artifacts produced in your CI/CD workflows and have pre-installed software.  This action not only lets you build customized images but also distribute them using image managing Azure services like [Shared Image Gallery](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/shared-image-galleries). These images can then be used for creating [Virtual Machines](https://azure.microsoft.com/en-in/services/virtual-machines/) or [Virtual Machine Scale Sets](https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview) 
 
 
-The definition of this Github Action is in [action.yml](https://github.com/Azure/build-vm-image/blob/main/action.yml).
+The definition of this Github Action is in [action.yml](https://github.com/Azure/build-vm-image/blob/master/action.yml).
 
 Note that this action uses [Azure Image Builder](https://azure.microsoft.com/en-in/blog/streamlining-your-image-building-process-with-azure-image-builder/) service in the background for creating and publishing images. 
 
@@ -43,7 +43,7 @@ Note that this action uses [Azure Image Builder](https://azure.microsoft.com/en-
 
 * `resource-group-name`: Required. This is the resource group where the action creates a storage for saving artifacts needed for customized image.  Azure image builder also uses the same resource group for Image Template creation. 
 
-* `image-builder-template`:  The name of the image builder template resource to be used for creating and running the Image builder service. If you already have an [AIB Template file](https://github.com/danielsollondon/azvmimagebuilder/tree/master/quickquickstarts) downloaded in the runner, then you can give the full filepath to that as well. E.g. _${{ GITHUB.WORKSPACE }}/vmImageTemplate/ubuntuCustomVM.json_. Note that incase a filepath is provided in this action input, then parameters in the file will take precedence over action inputs. Irrespective, customizer section of action is always executed. 
+* `image-builder-template-name`:  The name of the image builder template resource to be used for creating and running the Image builder service. If you already have an [AIB Template file](https://github.com/danielsollondon/azvmimagebuilder/tree/master/quickquickstarts) downloaded in the runner, then you can give the full filepath to that as well. E.g. _${{ GITHUB.WORKSPACE }}/vmImageTemplate/ubuntuCustomVM.json_. Note that incase a filepath is provided in this action input, then parameters in the file will take precedence over action inputs. Irrespective, customizer section of action is always executed. 
 
 * `location`: This is the location where the Azure Image Builder(AIB) will run. Eg, 'eastus2'. AIB supports only a [specific set of locations](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/image-builder-overview#regions). The source images must be present in this location, so for example, if you are using Shared Image Gallery, a replica must exist in that region. This is optional if AIB template filepath is provided in `image-builder-template` input.
 
@@ -109,27 +109,64 @@ Note that this action uses [Azure Image Builder](https://azure.microsoft.com/en-
 
 # End-to-End Sample Workflows
 
-### Sample workflow to create a custom Ubuntu OS image and store it as Managed Image 
+### Sample workflow to create a custom Windows OS image and distribute as a Managed Image
 
 ```yaml
-# File: .github/workflows/workflow.yml
+name: create_custom_windows_image
 
+on: push
+
+jobs:
+  BUILD-CUSTOM-IMAGE:
+    runs-on: ubuntu-latest    
+    steps:
+    - name: CHECKOUT
+      uses: actions/checkout@v2
+  
+
+    - name: AZURE LOGIN 
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+
+    - name: BUILD WEBAPP
+      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Run necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+      
+
+    - name: BUILD-CUSTOM-VM-IMAGE      
+      uses: azure/build-vm-image@v0
+      with:        
+        resource-group-name: 'myResourceGroup'
+        managed-identity: 'myImageBuilderIdentity'
+        location: 'eastus2'
+        source-os-type: 'windows'        
+        source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest        
+        customizer-script: |
+          & 'c:\workflow-artifacts\webApp\webconfig.ps1'
+
+```
+The above workflow will use a Microsoft Windows Server platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image, run image customizations(E.g. Set up IIS web server, configure bindings etc) using script webconfig.ps1, finally it will distribute the baked custom image as a Managed Image(default distribution)
+
+
+### Sample workflow to create a custom Ubuntu OS image and distribute it as Managed Image 
+
+```yaml
 on: push
 
 jobs:      
   job1:
     runs-on: ubuntu-latest
-    name: Create Custom Image
+    name: Create Custom Linux Image
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     
-    - name: Create Sample Workflow Artifacts
+    - name: Create Workflow Artifacts
       run: |
         cd  "$GITHUB_WORKFLOW"
         mkdir worflow-artifacts/        
-        echo "echo Installing World... " > $GITHUB_WORKSPACE/workflow-artifacts/install-world.sh 
-        echo "echo Installing Universe... " > $GITHUB_WORKSPACE/workflow-artifacts/install-universe.sh
+        echo "echo Installing World... " > $GITHUB_WORKSPACE/workflow-artifacts/install-world.sh  # You can have your own installation script here
+
     
     - name: Login via Az module
       uses: azure/login@v1
@@ -139,21 +176,62 @@ jobs:
     - name: Build and Distribute Custom VM Image      
       uses: azure/build-vm-image@v0
       with:        
-        resource-group-name: 'dev-rg'
+        resource-group-name: 'myResourceGroup'
         location: 'eastus2'
-        managed-identity: 'image-creation-identity'
+        managed-identity: 'myImageBuilderIdentity'
         source-os-type: 'linux'
         source-image-type: 'PlatformImage'
-        source-image: Canonical:UbuntuServer:18.04-LTS:latest        
+        source-image: Canonical:UbuntuServer:18.04-LTS:latest 
+        customizer-source: ${{ GITHUB.WORKSPACE }}/workflow_artifacts
         customizer-script: |
           sudo mkdir /buildArtifacts
           sudo cp -r /tmp/ /buildArtifacts/
+          sh /buildArtifacts/workflow-artifacts/install-world.sh
 
         
 ```
-The above workflow will use a linux platform image as base image, inject files present in directory ${{ GITHUB.WORKSPACE }}/worflow-artifacts of GitHub runner into the base image and build it. Finally it will distribute the custom image as a Managed Image(default distribution)
+The above workflow will use a linux platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image at default `customizer-destination` directory and run install-world.sh script. Finally it will distribute the baked custom image as a Managed Image(default distribution)
 
 
+### Sample workflow to create a custom Ubuntu OS image and distribute through Shared Image Gallery
+
+```yaml
+on: push
+
+jobs:
+  BUILD-CUSTOM-UBUNTU-IMAGE:
+    runs-on: ubuntu-latest    
+    steps:
+    - name: CHECKOUT
+      uses: actions/checkout@v2
+  
+
+    - name: AZURE LOGIN 
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+
+    - name: BUILD WEBAPP
+      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Run necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+      
+
+    - name: BUILD-CUSTOM-VM-IMAGE      
+      uses: azure/build-vm-image@v0
+      with:        
+        resource-group-name: 'myResourceGroup'
+        managed-identity: 'myImageBuilderIdentity'
+        location: 'eastus2'
+        source-os-type: 'linux'        
+        source-image: Canonical:UbuntuServer:18.04-LTS:latest      
+        customizer-script: |
+          sh /tmp/workflow-artifacts/install.sh
+        distributor-type: 'SharedImageGallery'
+        dist-resource-id: '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Compute/galleries/AppTeam/images/ImagesWithApp'
+        dist-location: 'eastus2'
+          
+        
+```
+The above workflow will use a linux platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image at default `customizer-destination` directory and run install.sh script. Finally it will distribute the baked custom image through Shared Image Gallery
 
 
 ## Configure credentials for Azure login action:
