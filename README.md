@@ -109,22 +109,59 @@ Note that this action uses [Azure Image Builder](https://azure.microsoft.com/en-
 
 # End-to-End Sample Workflows
 
-### Sample workflow to create a custom Ubuntu OS image and store it as Managed Image 
+### Sample workflow to create a custom Windows OS image and distribute as a Managed Image
 
 ```yaml
-# File: .github/workflows/workflow.yml
+name: create_custom_windows_image
 
+on: push
+
+jobs:
+  BUILD-CUSTOM-IMAGE:
+    runs-on: ubuntu-latest    
+    steps:
+    - name: CHECKOUT
+      uses: actions/checkout@v2
+  
+
+    - name: AZURE LOGIN 
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+
+    - name: BUILD WEBAPP
+      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Run necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+      
+
+    - name: BUILD-CUSTOM-VM-IMAGE      
+      uses: azure/build-vm-image@v0
+      with:        
+        resource-group-name: 'myResourceGroup'
+        managed-identity: 'myImageBuilderIdentity'
+        location: 'eastus2'
+        source-os-type: 'windows'        
+        source-image: MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest        
+        customizer-script: |
+          & 'c:\workflow-artifacts\webApp\webconfig.ps1'
+
+```
+The above workflow will use a Microsoft Windows Server platform image as base image, inject files present in directory ${{ GITHUB.WORKSPACE }}/worflow-artifacts of GitHub runner into the base image, run image customizations(E.g. Set up web server) using script webconfig.ps1, finally it will distribute the baked custom image as a Managed Image(default distribution)
+
+
+### Sample workflow to create a custom Ubuntu OS image and distribute it as Managed Image 
+
+```yaml
 on: push
 
 jobs:      
   job1:
     runs-on: ubuntu-latest
-    name: Create Custom Image
+    name: Create Custom Linux Image
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     
-    - name: Create Sample Workflow Artifacts
+    - name: Create Workflow Artifacts
       run: |
         cd  "$GITHUB_WORKFLOW"
         mkdir worflow-artifacts/        
@@ -139,16 +176,18 @@ jobs:
     - name: Build and Distribute Custom VM Image      
       uses: azure/build-vm-image@v0
       with:        
-        resource-group-name: 'dev-rg'
+        resource-group-name: 'myResourceGroup'
         location: 'eastus2'
-        managed-identity: 'image-creation-identity'
+        managed-identity: 'myImageBuilderIdentity'
         source-os-type: 'linux'
         source-image-type: 'PlatformImage'
-        source-image: Canonical:UbuntuServer:18.04-LTS:latest        
+        source-image: Canonical:UbuntuServer:18.04-LTS:latest 
+        customizer-source: ${{ GITHUB.WORKSPACE }}/workflow_artifacts
         customizer-script: |
           sudo mkdir /buildArtifacts
           sudo cp -r /tmp/ /buildArtifacts/
-
+          sh /buildArtifacts/workflow-artifacts/install-world.sh
+          sh /buildArtifacts/workflow-artifacts/install-world.sh
         
 ```
 The above workflow will use a linux platform image as base image, inject files present in directory ${{ GITHUB.WORKSPACE }}/worflow-artifacts of GitHub runner into the base image and build it. Finally it will distribute the custom image as a Managed Image(default distribution)
