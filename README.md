@@ -1,9 +1,9 @@
 # GitHub Action to Build Custom Virtual Machine Images
 
-With the Build Virtual Machine Image action, you can now easily create custom virtual machine images that contain artifacts produced in your CI/CD workflows and have pre-installed software.  This action not only lets you build customized images but also distribute them using image managing Azure services like [Shared Image Gallery](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/shared-image-galleries). These images can then be used for creating [Virtual Machines](https://azure.microsoft.com/en-in/services/virtual-machines/) or [Virtual Machine Scale Sets](https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview) 
+With the Build Azure Virtual Machine Image action, you can now easily create custom virtual machine images that contain artifacts produced in your CI/CD workflows and have pre-installed software.  This action not only lets you build customized images but also distribute them using image managing Azure services like [Shared Image Gallery](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/shared-image-galleries). These images can then be used for creating [Virtual Machines](https://azure.microsoft.com/en-in/services/virtual-machines/) or [Virtual Machine Scale Sets](https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/overview) 
 
 
-The definition of this Github Action is in [action.yml](https://github.com/Azure/build-vm-image/blob/main/action.yml).
+The definition of this Github Action is in [action.yml](https://github.com/Azure/build-vm-image/blob/master/action.yml).
 
 Note that this action uses [Azure Image Builder](https://azure.microsoft.com/en-in/blog/streamlining-your-image-building-process-with-azure-image-builder/) service in the background for creating and publishing images. 
 
