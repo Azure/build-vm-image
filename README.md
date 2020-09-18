@@ -109,7 +109,7 @@ Note that this action uses [Azure Image Builder](https://azure.microsoft.com/en-
 
 # End-to-End Sample Workflows
 
-### Sample workflow to create a custom Windows OS image and distribute as a Managed Image
+### Sample workflow to create a custom Windows OS image and distribute it as a Managed Image
 
 ```yaml
 name: create_custom_windows_image
@@ -130,7 +130,7 @@ jobs:
         creds: ${{secrets.AZURE_CREDENTIALS}}
 
     - name: BUILD WEBAPP
-      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Run necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Runs necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
       
 
     - name: BUILD-CUSTOM-VM-IMAGE      
@@ -145,7 +145,7 @@ jobs:
           & 'c:\workflow-artifacts\webApp\webconfig.ps1'
 
 ```
-The above workflow will use a Microsoft Windows Server platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image, run image customizations(E.g. Set up IIS web server, configure bindings etc) using script webconfig.ps1, finally it will distribute the baked custom image as a Managed Image(default distribution)
+The above workflow will use a Microsoft Windows Server platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image at default `customizer-destination` directory and  run image customizations(E.g. Set up IIS web server, configure bindings etc) using script webconfig.ps1, finally it will distribute the baked custom image as a Managed Image(default distribution)
 
 
 ### Sample workflow to create a custom Ubuntu OS image and distribute it as Managed Image 
