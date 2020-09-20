@@ -15,7 +15,7 @@ In order to help you with deploying immutable VMs, we have launched a new [Build
 Note that internally this action behind the scenes leverages [Azure Image Builder](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/image-builder-overview) service. All the inputs provided in the action are processed and submitted to Azure Image Builder service. 
 
 
-### Sample Walkthrough: 
+## Sample Walkthrough: 
 
 Lets now quickly see how you can easily start using this action. In the following sections, we'll describe a workflow that:
 
@@ -26,7 +26,7 @@ Lets now quickly see how you can easily start using this action. In the followin
 - Creates a VM using the above created custom image
 
 
-#### Pre-requisites:
+### Pre-requisites:
 - *Azure Login Credentials*: In the workflow we will be accessing resources in azure, so you'll need to generate your credentials and store it as a GitHub secret. This secret will be used by Azure Login Action. You can refer [configuring azure credentials for Azure login action](https://github.com/zenithworks/Custom_VM_Image#configure-credentials-for-azure-login-action) to create this.
 
 - *Shared Image Gallery*: We will be uploading the created custom VM image to a shared image gallery. So this should already be present. Learn [how to create a Shared image gallery](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/shared-images-portal#:~:text=In%20the%20Shared%20image%20gallery,the%20name%20of%20the%20gallery.). Remember to select "Windows" as the operating system when configuring the image definition in the Shared image gallery. This is because we will be customizing a windows image. Also the region should be same as one of the [regions supported](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/image-builder-overview#regions) by Azure Image Builder. Select 'East US', if confused.
@@ -45,7 +45,7 @@ Lets now quickly see how you can easily start using this action. In the followin
 
 
  
-#### GitHub Workflow
+### GitHub Workflow
 
 1. Checkout application code to the GitHub runner. For this example, my application code is in a webApp folder located at the root of the GitHub repository. The `checkout` step will download all the repository files in the location ${{ GITHUB.WORKSPACE }} in GitHub runner.
 
@@ -159,6 +159,6 @@ Here is a full yaml script including all the above 4 steps:
 ```
 
 
-#### Result
+### Result
 
 On executing the above workflow, it will push a windows image to shared image gallery. The pushed image will be tagged with github repository and run details so that you can trace every image back to the workflow run and can understand the exact changes that were included in this. Also a VM is spun up from this image.  ![Image of baked image](./_imgs/bakedimage.png)
