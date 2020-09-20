@@ -90,7 +90,7 @@ Lets now quickly see how you can easily start using this action. In the followin
               & 'c:\webApp\webconfig.ps1' # This script configures IIS server
 
             dist-type: 'SharedImageGallery'
-            dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}resourceGroups/ raivmdemo-rg/providers/Microsoft.Compute/galleries/appImageGallery/images/AppBakedVMs/versions/0.1.${{ GITHUB.RUN_ID }}' #Replace with the resource id of your shared image  gallery's image definition
+            dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}resourceGroups/raivmdemo-rg/providers/Microsoft.Compute/galleries/appImageGallery/images/AppBakedVMs/versions/0.1.${{ GITHUB.RUN_ID }}' #Replace with the resource id of your shared image  gallery's image definition
             dist-location: 'eastus'
     ```
 
@@ -145,7 +145,7 @@ Here is a full yaml script including all the above 4 steps:
               & 'c:\webApp\webconfig.ps1'
 
             dist-type: 'SharedImageGallery'
-            dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}resourceGroups/ raivmdemo-rg/providers/Microsoft.Compute/galleries/appImageGallery/images/AppBakedVMs/versions/0.1.${{ GITHUB.RUN_ID }}' #Replace with the resource id of your shared image  gallery's image definition
+            dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}resourceGroups/raivmdemo-rg/providers/Microsoft.Compute/galleries/appImageGallery/images/AppBakedVMs/versions/0.1.${{ GITHUB.RUN_ID }}' #Replace with the resource id of your shared image  gallery's image definition
             dist-location: 'eastus'
 
         - name: CREATE VM
