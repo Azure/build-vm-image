@@ -233,6 +233,24 @@ jobs:
 ```
 The above workflow will use a linux platform image as base image, inject files present in directory `${{ GITHUB.WORKSPACE }}/worflow-artifacts` of GitHub runner into the base image at default `customizer-destination` directory and run install.sh script. Finally it will distribute the baked custom image through Shared Image Gallery
 
+### Snippet to spin up a virtual machine from custom image
+
+You can easily create a Virtual Machine using [AZ CLI commands](https://docs.microsoft.com/en-us/cli/azure/vm?view=azure-cli-latest). Here is a simple example to do it using GitHub workflows.
+
+```yaml
+- name: CREATE VM
+  uses: azure/CLI@v1
+  with:
+    azcliversion: 2.0.72
+    inlineScript: |
+      az vm create --resource-group myResourceGroup  --name "app-vm-${{ GITHUB.RUN_NUMBER }}"  --admin-username vmUserName --admin-password "${{ secrets.VM_PWD }}" --location  eastus2 \
+      --image "${{ steps.<workflow_step_id>.outputs.custom-image-uri }}"              
+
+ ```
+You can also take a look at the [end to end tutorial](https://github.com/Azure/build-vm-image/blob/master/tutorial/how-to-use-action.md) that describes how to use this action and also create a Virtual machine from customized image.
+
+
+
 
 ## Configure credentials for Azure login action:
 
