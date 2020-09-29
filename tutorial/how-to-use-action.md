@@ -87,7 +87,7 @@ Lets now quickly see how you can easily start using this action. In the followin
 
             customizer-source: '${{ GITHUB.WORKSPACE }}\webApp'  # This folder gets injected to the image at directory location C:\
             customizer-script: |
-              & 'c:\webApp\webconfig.ps1' # This script configures IIS server
+              & 'c:\webApp\webconfig.ps1'
 
             dist-type: 'SharedImageGallery'
             dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}resourceGroups/raivmdemo-rg/providers/Microsoft.Compute/galleries/appImageGallery/images/AppBakedVMs/versions/0.1.${{ GITHUB.RUN_ID }}' #Replace with the resource id of your shared image  gallery's image definition
