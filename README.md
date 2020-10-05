@@ -37,7 +37,7 @@ Note that this action uses [Azure Image Builder](https://azure.microsoft.com/en-
   }
 
 ```
-
+Learn more about configuring permissions for Azure Image builder Service using [Powershell](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-permissions-powershell?toc=/azure/virtual-machines/windows/toc.json&bc=/azure/virtual-machines/windows/breadcrumb/toc.json) or [Azure CLI](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-permissions-cli?toc=/azure/virtual-machines/windows/toc.json&bc=/azure/virtual-machines/windows/breadcrumb/toc.json).
 
 # Inputs for the Action
 
