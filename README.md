@@ -130,7 +130,7 @@ jobs:
         creds: ${{secrets.AZURE_CREDENTIALS}}
 
     - name: BUILD WEBAPP
-      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Runs necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Runs necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow-artifacts
       
 
     - name: BUILD-CUSTOM-VM-IMAGE      
@@ -182,7 +182,7 @@ jobs:
         source-os-type: 'linux'
         source-image-type: 'PlatformImage'
         source-image: Canonical:UbuntuServer:18.04-LTS:latest 
-        customizer-source: ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+        customizer-source: ${{ GITHUB.WORKSPACE }}/workflow-artifacts
         customizer-script: |
           sudo mkdir /buildArtifacts
           sudo cp -r /tmp/ /buildArtifacts/
@@ -212,7 +212,7 @@ jobs:
         creds: ${{secrets.AZURE_CREDENTIALS}}
 
     - name: BUILD WEBAPP
-      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Run necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow_artifacts
+      run: sudo ${{ GITHUB.WORKSPACE }}/webApp/buildscript.sh # Run necessary build scripts and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/workflow-artifacts
       
 
     - name: BUILD-CUSTOM-VM-IMAGE      
