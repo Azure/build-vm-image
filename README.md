@@ -80,7 +80,7 @@ Learn more about configuring permissions for Azure Image builder Service using [
     /subscriptions/<subscriptionID>/resourceGroups/<sigResourceGroup>/providers/Microsoft.Compute/galleries/<sigName>/images/<imageDefName>/versions/<versionNumber> 
     ```
     
-* `customizer-source`: Optional. This takes the path to a directory in the runner. This is the directory where you can keep all the artifacts that need to be added to the base image for customization. By default, the value is _${{ GITHUB.WORKSPACE }}/workflow-artifacts_. 
+* `customizer-source`: Optional. This takes the path to a directory in the runner. This is the directory where you can keep all the artifacts that need to be added to the base image for customization. By default, the value is _${{ GITHUB.WORKSPACE }}/workflow-artifacts. 
 * `customizer-script `: Optional. This takes multi inline powershell or shell commands and use variables to point to directories inside the downloaded location.
 * `customizer-destination` : Optional. This is the directory in the customized image where artifacts are copied to. The default path of customizer-destination would depend on the OS defined in 'source-os-type' field. For windows it is C:\ and for linux it is /tmp/. Note that for many Linux OS's, on a reboot, the /tmp directory contents are deleted. So if you need these artifacts to persist you need to write customizer script to copy them to a persistent location. Here is a sample input for customizer-script:
 

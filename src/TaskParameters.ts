@@ -95,7 +95,7 @@ export default class TaskParameters {
         //customize inputs
         this.customizerSource = tl.getInput(constants.CustomizerSource).toString();
         if (this.customizerSource == undefined || this.customizerSource == "" || this.customizerSource == null) {
-            var artifactsPath = path.join(`${process.env.GITHUB_WORKSPACE}`, "imageArtifacts");
+            var artifactsPath = path.join(`${process.env.GITHUB_WORKSPACE}`, "workflow-artifacts");
             if (fs.existsSync(artifactsPath)) {
                 this.customizerSource = artifactsPath;
             }
