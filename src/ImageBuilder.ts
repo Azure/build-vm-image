@@ -374,8 +374,8 @@ export default class ImageBuilder {
     private async cleanup(subscriptionId: string) {
         try {
             if (!this.isVhdDistribute && this.imgBuilderTemplateExists) {
-                await this._aibClient.deleteTemplate(this.templateName, subscriptionId);
-                console.log(`${this.templateName} got deleted`);
+                /*await this._aibClient.deleteTemplate(this.templateName, subscriptionId);
+                console.log(`${this.templateName} got deleted`);*/
             }
 
             if (storageAccountExists) {
