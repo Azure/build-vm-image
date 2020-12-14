@@ -92,18 +92,18 @@ Learn more about configuring permissions for Azure Image builder Service using [
 
 * `customizer-windows-update`: Optional. Applicable for only windows images. The value is a boolean. If set to true, the image builder will run Windows update at the end of the customizations and also handle the reboots if required. By default the value is set to 'false'
 
-* `distributor-type`: Optional. This takes your choice for distributing the built image. It can be set to [ ManagedImage | SharedImageGallery | VHD ]. By default its ManagedImage.
+* `dist-type`: Optional. This takes your choice for distributing the built image. It can be set to [ ManagedImage | SharedImageGallery | VHD ]. By default its ManagedImage.
 * `dist-resource-id`: Optional. Takes the full resource identifier. 
-  * If the distributor-type is SharedImageGallery the value can be:
+  * If the dist-type is SharedImageGallery the value can be:
     ```yaml
     /subscriptions/<subscriptionID>/resourceGroups/<rgName>/providers/Microsoft.Compute/galleries/<galleryName>/images/<imageDefName>
     ```
-  * If the distributor-type is ManagedImage, the value should be of format:
+  * If the dist-type is ManagedImage, the value should be of format:
     ```yaml
     /subscriptions/<subscriptionID>/resourceGroups/<rgName>/providers/Microsoft.Compute/images/<imageName>
     ```
   * If the image-type is VHD, You do not need to pass this parameter
-* `dist-location`: Optional. This is required only when SharedImageGallery is the `distributor-type` 
+* `dist-location`: Optional. This is required only when SharedImageGallery is the `dist-type` 
 * `dist-image-tags`: Optional. These are user defined tags that are added to the custom image created. They take key value pairs as input. E.g. _'version:beta'_
  
 
@@ -225,7 +225,7 @@ jobs:
         source-image: Canonical:UbuntuServer:18.04-LTS:latest      
         customizer-script: |
           sh /tmp/workflow-artifacts/install.sh
-        distributor-type: 'SharedImageGallery'
+        dist-type: 'SharedImageGallery'
         dist-resource-id: '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Compute/galleries/AppTeam/images/ImagesWithApp'
         dist-location: 'eastus2'
           
