@@ -47,7 +47,7 @@ export default class TaskParameters {
     public distImageTags: string = "";
 
     constructor() {
-        var locations = ["eastus", "eastus2", "westcentralus", "westus", "westus2", "northeurope", "westeurope"];
+        var locations = ["eastus", "eastus2", "westcentralus", "westus", "westus2", "southcentralus", "northeurope", "westeurope", "southeastasia", "australiasoutheast", "australia", "uksouth", "ukwest" ];
 
         console.log("start reading task parameters...");
 
