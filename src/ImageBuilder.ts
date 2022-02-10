@@ -78,7 +78,10 @@ export default class ImageBuilder {
             else {
                 var template = JSON.parse(this._taskParameters.templateJsonFromUser);
                 this._taskParameters.location = template.location;
-            }
+            }            
+                
+            this.templateName = this.getTemplateName();
+            var runOutputName = this.getRunoutputName();
 
             console.log("Using Managed Identity " + this.idenityName);
             var blobUrl = "";
@@ -116,18 +119,28 @@ export default class ImageBuilder {
             await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
             this.imgBuilderTemplateExists = true;
 
-            await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
-            var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
+            await this._aibClient.runTemplate(this.templateName, subscriptionId,  this._taskParameters.buildTimeoutInMinutes);
             var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
-            var imagebuilderRunStatus = "failed";
-            core.setOutput('templateName', this.templateName);
-            core.setOutput('templateId', templateID);
-            core.setOutput('run-output-name', runOutputName);
-            if (out) {
-                core.setOutput('custom-image-uri', out);
-                core.setOutput('imagebuilder-run-status', "succeeded");
-                imagebuilderRunStatus = "succeeded";
+
+            if (this._taskParameters.actionRunMode !== "nowait"){
+                var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
+                var imagebuilderRunStatus = "failed";
+                core.setOutput('templateName', this.templateName);
+                core.setOutput('templateId', templateID);
+                core.setOutput('run-output-name', runOutputName);
+                if (out) {
+                    core.setOutput('custom-image-uri', out);
+                    core.setOutput('imagebuilder-run-status', "succeeded");
+                    imagebuilderRunStatus = "succeeded";
+                }
             }
+            else{
+                out = ""
+                core.setOutput('custom-image-uri', out);
+                core.setOutput('imagebuilder-run-status', "skipped");
+                imagebuilderRunStatus = "skipped";
+            }
+            
 
             if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
                 core.setOutput('pirPublisher', templateJson.properties.source.publisher);
@@ -152,6 +165,10 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
+                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" || this._taskParameters.actionRunMode == "distro")){
+                    console.log("skipping cleanup action run mode set to nowait or distro")
+                    return
+                }
                 this.cleanup(subscriptionId);
             }
         }

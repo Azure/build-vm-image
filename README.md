@@ -41,6 +41,16 @@ Learn more about configuring permissions for Azure Image builder Service using [
 
 # Inputs for the Action
 
+* `action-run-mode`: Required. This is the run mode for the action. The options are
+  * Full
+    * default
+    * Wait until everything completes
+  * Distro
+    * Wait until the template starts the distro process
+  * NoWait
+    * This will not wait for actions to complete, like run template
+    * It will try to get the action to complete the quicket but can require the most manual cleanup
+
 * `resource-group-name`: Required. This is the resource group where the action creates a storage for saving artifacts needed for customized image.  Azure image builder also uses the same resource group for Image Template creation. 
 
 * `image-builder-template-name`:  The name of the image builder template resource to be used for creating and running the Image builder service. If you already have an [AIB Template file](https://github.com/danielsollondon/azvmimagebuilder/tree/master/quickquickstarts) downloaded in the runner, then you can give the full filepath to that as well. E.g. _${{ GITHUB.WORKSPACE }}/vmImageTemplate/ubuntuCustomVM.json_. Note that incase a filepath is provided in this action input, then parameters in the file will take precedence over action inputs. Irrespective, customizer section of action is always executed. 
