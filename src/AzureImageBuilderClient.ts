@@ -60,8 +60,30 @@ export default class ImageBuilderClient {
             throw Error(`Submit template call failed for template ${templateName} with error: ${JSON.stringify(error)}`);
         }
     }
+    public async getRunTemplate(templateName: string, subscriptionId: string){
+        try {
+            let httpRequest = {
+                method: 'GET',
+                uri: this._client.getRequestUri(`/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imagetemplates/{imageTemplateName}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{imageTemplateName}': templateName }, [], apiVersion)
+            };
+            var response = await this._client.beginRequest(httpRequest);
 
-    public async runTemplate(templateName: string, subscriptionId: string, timeOutInMinutes: number) {
+            if (response.statusCode == 202) {
+                response = await this.getLongRunningOperationResult(response);
+            }
+            if (response.statusCode != 200 || response.body.status == "Failed") {
+                throw ToError(response);
+            }
+            if (response.statusCode == 200 && response.body && response.body.status == "Succeeded") {
+                console.log("Run template: \n", response.body.status);
+            }
+            return response
+        }
+        catch (error) {
+            throw Error(`Post template call failed for template ${templateName} with error: ${JSON.stringify(error)}`);
+        }
+    }
+    public async runTemplate(templateName: string, subscriptionId: string,timeOutInMinutes: number) {
         try {
             console.log("Starting run template...");
             let httpRequest: WebRequest = {
@@ -70,8 +92,13 @@ export default class ImageBuilderClient {
             };
 
             var response = await this._client.beginRequest(httpRequest);
+            
             if (response.statusCode == 202) {
-                response = await this.getLongRunningOperationResult(response, timeOutInMinutes);
+                if (this._taskParameters.actionRunMode == "nowait"){
+                    console.log("Action Run Mode set to NoWait. Skipping wait\n");
+                    return
+                }
+                response = await this.getLongRunningOperationResult(response, timeOutInMinutes, templateName, subscriptionId);
             }
             if (response.statusCode != 200 || response.body.status == "Failed") {
                 throw ToError(response);
@@ -135,7 +162,7 @@ export default class ImageBuilderClient {
         return output;
     }
 
-    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes?: number): Promise<WebResponse> {
+    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes?: number, templateName: string, subscriptionId: string): Promise<WebResponse> {
         var longRunningOperationRetryTimeout = !!timeoutInMinutes ? timeoutInMinutes : 0;
         timeoutInMinutes = timeoutInMinutes || longRunningOperationRetryTimeout;
         var timeout = new Date().getTime() + timeoutInMinutes * 60 * 1000;
@@ -160,6 +187,27 @@ export default class ImageBuilderClient {
                 }
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
                     throw Error(`error in url`);
+                }
+                if (this._taskParameters.actionRunMode == "buildonly" && templateName && subscriptionId){
+                    try{
+                        let runTemplate_result = null
+                        try{
+                            runTemplate_result = await this.getRunTemplate(templateName, subscriptionId).then(result=> (runTemplate_result = result))
+
+                            if (!runTemplate_result.body.properties && !runTemplate_result.body.properties.lastRunStatus){
+                                if (runTemplate_result.properties.lastRunStatus.runSubState.toLowerCase() == "distributing"){
+                                    console.log("Template is distributing set to break")
+                                    return runTemplate_result
+                                }
+                            }
+                        }
+                        catch(err){
+                            console.log(err)
+                        }                            
+                    }
+                    catch(err){
+                        console.log(err)
+                    }
                 }
                 var sleepDuration = 15;
                 await this.sleepFor(sleepDuration);

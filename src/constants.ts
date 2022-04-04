@@ -1,3 +1,4 @@
+export var ActionRunMode = "action-run-mode";
 export var Location = "location";
 export var ResourceGroupName = "resource-group-name";
 export var ImageBuilderTemplateName = "image-builder-template-name";
