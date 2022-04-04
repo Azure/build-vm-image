@@ -188,7 +188,7 @@ export default class ImageBuilderClient {
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
                     throw Error(`error in url`);
                 }
-                if (this._taskParameters.actionRunMode == "distro" && templateName && subscriptionId){
+                if (this._taskParameters.actionRunMode == "buildonly" && templateName && subscriptionId){
                     try{
                         let runTemplate_result = null
                         try{

@@ -165,8 +165,8 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
-                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" || this._taskParameters.actionRunMode == "distro")){
-                    console.log("skipping cleanup action run mode set to nowait or distro")
+                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" || this._taskParameters.actionRunMode == "buildonly")){
+                    console.log("skipping cleanup action run mode set to nowait or buildonly")
                     return
                 }
                 this.cleanup(subscriptionId);
@@ -390,7 +390,7 @@ export default class ImageBuilder {
 
     private async cleanup(subscriptionId: string) {
         try {
-            if (!this.isVhdDistribute && this.imgBuilderTemplateExists) {
+            if (!this.isVhdDistribute && this.imgBuilderTemplateExists && this._taskParameters.actionRunMode == "full")) {
                 await this._aibClient.deleteTemplate(this.templateName, subscriptionId);
                 console.log(`${this.templateName} got deleted`);
             }

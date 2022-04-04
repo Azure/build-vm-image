@@ -7,6 +7,7 @@ var fs = require('fs');
 
 export default class TaskParameters {
     // image builder inputs
+    public actionRunMode: string = "";
     public resourceGroupName: string = "";
     public location: string = "";
     public imagebuilderTemplateName: string;
@@ -51,6 +52,13 @@ export default class TaskParameters {
 
         console.log("start reading task parameters...");
 
+        this.actionRunMode = tl.getInput(constants.ActionRunMode, { required: true }).toLowerCase();
+        if (!this.actionRunMode){
+            this.actionRunMode = "full"
+        }
+
+        console.log(`Action run mode set: ${this.actionRunMode}`)
+
         this.imagebuilderTemplateName = tl.getInput(constants.ImageBuilderTemplateName);
         if (this.imagebuilderTemplateName.indexOf(".json") > -1) {
             this.isTemplateJsonProvided = true;
@@ -59,6 +67,7 @@ export default class TaskParameters {
         }
 
         this.resourceGroupName = tl.getInput(constants.ResourceGroupName, { required: true });
+
         this.buildTimeoutInMinutes = parseInt(tl.getInput(constants.BuildTimeoutInMinutes));
         this.sourceOSType = tl.getInput(constants.SourceOSType, { required: true });
         if (Utils.IsEqual(this.sourceOSType, "windows")) {

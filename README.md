@@ -45,8 +45,8 @@ Learn more about configuring permissions for Azure Image builder Service using [
   * Full
     * default
     * Wait until everything completes
-  * Distro
-    * Wait until the template starts the distro process
+  * BuildOnly
+    * Waits until the template starts the distribute process
   * NoWait
     * This will not wait for actions to complete, like run template
     * It will try to get the action to complete the quicket but can require the most manual cleanup

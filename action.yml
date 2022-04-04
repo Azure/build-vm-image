@@ -3,7 +3,7 @@ description: "Create custom virtual machine images that contain artifacts built 
 inputs:
    #action inputs   
    action-run-mode:
-      description: 'The run mode for the action. Full (default) wait until everything completes, Distro wait until the template starts the distro process, NoWait as soon as the action sets up and triggers the action it will quit'
+      description: 'The run mode for the action. Full (default) wait until everything completes, BuildOnly waits until the template starts the didistribute stro process, NoWait as soon as the action sets up and triggers the action it will quit'
       required: true
       default: full
 
