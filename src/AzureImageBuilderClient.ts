@@ -162,9 +162,8 @@ export default class ImageBuilderClient {
         return output;
     }
 
-    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes?: number, templateName: string, subscriptionId: string): Promise<WebResponse> {
-        var longRunningOperationRetryTimeout = !!timeoutInMinutes ? timeoutInMinutes : 0;
-        timeoutInMinutes = timeoutInMinutes || longRunningOperationRetryTimeout;
+    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes: number = -1, templateName: string = "", subscriptionId: string = ""): Promise<WebResponse> {
+        timeoutInMinutes = timeoutInMinutes > -1 ? timeoutInMinutes : 0;
         var timeout = new Date().getTime() + timeoutInMinutes * 60 * 1000;
         var waitIndefinitely = timeoutInMinutes == 0;
         var requestURI = response.headers["azure-asyncoperation"] || response.headers["location"];
@@ -172,6 +171,7 @@ export default class ImageBuilderClient {
             method: 'GET',
             uri: requestURI
         };
+
         if (!httpRequest.uri) {
             throw new Error("InvalidResponseLongRunningOperation");
         }
@@ -188,25 +188,39 @@ export default class ImageBuilderClient {
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
                     throw Error(`error in url`);
                 }
-                if (this._taskParameters.actionRunMode == "buildonly" && templateName && subscriptionId){
-                    try{
-                        let runTemplate_result = null
-                        try{
+                if ( this._taskParameters.actionRunMode != "full" && (templateName && templateName != "") && (subscriptionId && subscriptionId != "") ) {
+                    var runTemplate_result = null
+                    if ( this._taskParameters.actionRunMode == "custom" ){
+                        var running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
+
+                        if ( running_time_minutes >= this._taskParameters.actionRunModeMinutes){
                             runTemplate_result = await this.getRunTemplate(templateName, subscriptionId).then(result=> (runTemplate_result = result))
 
-                            if (!runTemplate_result.body.properties && !runTemplate_result.body.properties.lastRunStatus){
-                                if (runTemplate_result.properties.lastRunStatus.runSubState.toLowerCase() == "distributing"){
-                                    console.log("Template is distributing set to break")
-                                    return runTemplate_result
+                            return runTemplate_result
+                        }
+
+
+                    }
+                    if (this._taskParameters.actionRunMode == "buildonly" ) {
+                        try{
+                            
+                            try{
+                                runTemplate_result = await this.getRunTemplate(templateName, subscriptionId).then(result=> (runTemplate_result = result))
+
+                                if (!runTemplate_result.body.properties && !runTemplate_result.body.properties.lastRunStatus){
+                                    if (runTemplate_result.properties.lastRunStatus.runSubState.toLowerCase() == "distributing"){
+                                        console.log("Template is distributing set to break")
+                                        return runTemplate_result
+                                    }
                                 }
                             }
+                            catch(err){
+                                console.log(err)
+                            }                            
                         }
                         catch(err){
                             console.log(err)
-                        }                            
-                    }
-                    catch(err){
-                        console.log(err)
+                        }
                     }
                 }
                 var sleepDuration = 15;
