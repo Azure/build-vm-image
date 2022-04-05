@@ -179,20 +179,18 @@ export default class ImageBuilderClient {
         }
         
         while (true) {
-            console.log("getLongRunningOperationResult - 1")
             var response = await this._client.beginRequest(httpRequest);
             if (response.statusCode === 202 || (response.body && (response.body.status == "Accepted" || response.body.status == "Running" || response.body.status == "InProgress"))) {
                 if (response.body && response.body.status) {
                     core.debug(response.body.status);
                 }
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
-                    console.log("getLongRunningOperationResult - 2")
                     throw Error(`error in url`);
                 }
                 if ( this._taskParameters.actionRunMode != "full" && (templateName && templateName != "") && (subscriptionId && subscriptionId != "") ) {
-                    var runTemplate_result = null
+                    let runTemplate_result = null
                     if ( this._taskParameters.actionRunMode == "custom" ){
-                        var running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
+                        let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
 
                         if ( running_time_minutes >= this._taskParameters.actionRunModeMinutes){
                             runTemplate_result = await this.getRunTemplate(templateName, subscriptionId).then(result=> (runTemplate_result = result))
