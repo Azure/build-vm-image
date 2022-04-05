@@ -192,7 +192,8 @@ export default class ImageBuilderClient {
                     if ( this._taskParameters.actionRunMode == "custom" ){
                         let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
 
-                        if ( running_time_minutes >= this._taskParameters.actionRunModeMinutes){
+                        if ( running_time_minutes >= this._taskParameters.actionRunModeMinutes){                            
+                            console.log(`Hit Max Action Runtime Minutes: ${this._taskParameters.actionRunModeMinutes}`)
                             runTemplate_result = await this.getRunTemplate(templateName, subscriptionId).then(result=> (runTemplate_result = result))
 
                             return runTemplate_result
