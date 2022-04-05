@@ -194,11 +194,6 @@ export default class ImageBuilderClient {
 
                         if ( running_time_minutes >= this._taskParameters.actionRunModeMinutes){
                             runTemplate_result = await this.getRunTemplate(templateName, subscriptionId).then(result=> (runTemplate_result = result))
-                            
-                            console.log(running_time_minutes)
-                            console.log(templateName)
-                            console.log(subscriptionId)
-                            console.log(runTemplate_result)
 
                             return runTemplate_result
                         }
