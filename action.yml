@@ -4,8 +4,12 @@ inputs:
    #action inputs   
    action-run-mode:
       description: 'The run mode for the action. Full (default) wait until everything completes, BuildOnly waits until the template starts the didistribute stro process, NoWait as soon as the action sets up and triggers the action it will quit'
-      required: true
-      default: full
+      required: false
+      default: full  
+   action-run-mode-time-minutes:
+      description: 'If action-run-mode is custom, how long should action run'
+      required: false
+      default: 30
 
    #general inputs
    location:
@@ -66,4 +70,4 @@ outputs:
 
 runs:
    using: 'node12'
-   main: 'dist/index.js'
+   main: 'lib/index.js'

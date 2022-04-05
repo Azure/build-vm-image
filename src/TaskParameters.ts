@@ -6,8 +6,12 @@ import Utils from "./Utils";
 var fs = require('fs');
 
 export default class TaskParameters {
-    // image builder inputs
+    // action inputs
     public actionRunMode: string = "";
+    public actionRunModeMinutes: number = 30;
+    public actionStartTime: Date = new Date();
+
+    // image builder inputs
     public resourceGroupName: string = "";
     public location: string = "";
     public imagebuilderTemplateName: string;
@@ -49,15 +53,28 @@ export default class TaskParameters {
 
     constructor() {
         var locations = ["eastus", "eastus2", "westcentralus", "westus", "westus2", "westus3", "southcentralus", "northeurope", "westeurope", "southeastasia", "australiasoutheast", "australiaeast", "uksouth", "ukwest" ];
+        var actionRunModeOptions = ["full", "buildonly", "nowait", "custom"]
 
         console.log("start reading task parameters...");
 
-        this.actionRunMode = tl.getInput(constants.ActionRunMode, { required: true }).toLowerCase();
+        this.actionRunMode = tl.getInput(constants.ActionRunMode).toLowerCase();
         if (!this.actionRunMode){
+            this.actionRunMode = "full"
+        }
+        if (!(actionRunModeOptions.indexOf(this.actionRunMode) > -1)) {
+            throw new Error("action run mode not from available options: full, buildonly, nowait, custom");
+        }
+
+        this.actionRunModeMinutes = parseInt(tl.getInput(constants.ActionRunModeTimeMinutes));
+        if ( this.actionRunMode == "custom" && this.actionRunModeMinutes == 0 ){
+            console.log(`Action run mode set to full, custom minutes was set as 0"`)
             this.actionRunMode = "full"
         }
 
         console.log(`Action run mode set: ${this.actionRunMode}`)
+        if (this.actionRunMode == "custom"){
+            console.log(`Action run mode time set: ${this.actionRunModeMinutes}`)
+        }
 
         this.imagebuilderTemplateName = tl.getInput(constants.ImageBuilderTemplateName);
         if (this.imagebuilderTemplateName.indexOf(".json") > -1) {
