@@ -24,13 +24,16 @@ jobs:
           npm install
           npm i -g @vercel/ncc
 
+      - name: 'Build Project'
+        shell: bash
+        run: |
           ncc build lib/index.js --license LICENSE
 
       - name: Check for modified files
         id: git-check
         run: echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
 
-      - name: Commit formatted changes
+      - name: Commit Build file changes
         if: steps.git-check.outputs.modified == 'true'
         run: |
           git config --global user.name 'Azure Image Builder Bot'
