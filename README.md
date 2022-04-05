@@ -41,7 +41,7 @@ Learn more about configuring permissions for Azure Image builder Service using [
 
 # Inputs for the Action
 
-* `action-run-mode`: Required. This is the run mode for the action. The options are
+* `action-run-mode`: Optional. This is the run mode for the action. The options are
   * Full
     * default
     * Wait until everything completes
@@ -50,6 +50,14 @@ Learn more about configuring permissions for Azure Image builder Service using [
   * NoWait
     * This will not wait for actions to complete, like run template
     * It will try to get the action to complete the quicket but can require the most manual cleanup
+  * Custom
+    * This requires action-run-mode-time-minutes
+    * This will allow you to specify a max wait time 
+
+* `action-run-mode-time-minutes`: Optional. Only applies if action-run-mode is set to Custom. This allows you to specify the length in minutes to run
+  * Default 30 minutes
+  * If over 10 minutes the created storage account created for the build artifacts will be deleted as part of the cleanup
+  * If Set to 0 will run and set the Actuib Run Mode to Full
 
 * `resource-group-name`: Required. This is the resource group where the action creates a storage for saving artifacts needed for customized image.  Azure image builder also uses the same resource group for Image Template creation. 
 

@@ -49,6 +49,7 @@ export default class ImageBuilder {
     }
 
     async execute() {
+        imagebuilderRunStatus = ""
         try {
             azPath = await io.which("az", true);
             core.debug("Az module path: " + azPath);
@@ -395,7 +396,7 @@ export default class ImageBuilder {
                 console.log(`${this.templateName} got deleted`);
             }
 
-            if (storageAccountExists && this._taskParameters.actionRunMode == "nowait") {
+            if (storageAccountExists && this._taskParameters.actionRunMode != "nowait") {
                 let httpRequest: WebRequest = {
                     method: 'DELETE',
                     uri: this._client.getRequestUri(`subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{storageAccount}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{storageAccount}': this.storageAccount }, [], "2019-06-01")

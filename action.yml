@@ -4,8 +4,12 @@ inputs:
    #action inputs   
    action-run-mode:
       description: 'The run mode for the action. Full (default) wait until everything completes, BuildOnly waits until the template starts the didistribute stro process, NoWait as soon as the action sets up and triggers the action it will quit'
-      required: true
+      required: false
       default: full
+   action-run-mode-time-minutes:
+      description: 'The run mode for the action. Full (default) wait until everything completes, BuildOnly waits until the template starts the didistribute stro process, NoWait as soon as the action sets up and triggers the action it will quit'
+      required: false
+      default: 30
 
    #general inputs
    location:
