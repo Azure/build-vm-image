@@ -163,6 +163,7 @@ export default class ImageBuilderClient {
     }
 
     public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes?: number, templateName: string = "", subscriptionId: string = ""): Promise<WebResponse> {
+        console.log("getLongRunningOperationResult - 1")
         var longRunningOperationRetryTimeout = !!timeoutInMinutes ? timeoutInMinutes : 0;
         timeoutInMinutes = timeoutInMinutes || longRunningOperationRetryTimeout;
         var timeout = new Date().getTime() + timeoutInMinutes * 60 * 1000;
@@ -172,6 +173,7 @@ export default class ImageBuilderClient {
             method: 'GET',
             uri: requestURI
         };
+        console.log("getLongRunningOperationResult - 2")
 
         if (!httpRequest.uri) {
             throw new Error("InvalidResponseLongRunningOperation");
@@ -180,13 +182,16 @@ export default class ImageBuilderClient {
         if (!httpRequest.uri) {
             console.log("error in uri " + httpRequest.uri);
         }
+        console.log("getLongRunningOperationResult - 3")
         while (true) {
+            console.log("getLongRunningOperationResult - 4")
             var response = await this._client.beginRequest(httpRequest);
             if (response.statusCode === 202 || (response.body && (response.body.status == "Accepted" || response.body.status == "Running" || response.body.status == "InProgress"))) {
                 if (response.body && response.body.status) {
                     core.debug(response.body.status);
                 }
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
+                    console.log("getLongRunningOperationResult - 5")
                     throw Error(`error in url`);
                 }
                 if ( this._taskParameters.actionRunMode != "full" && (templateName && templateName != "") && (subscriptionId && subscriptionId != "") ) {
