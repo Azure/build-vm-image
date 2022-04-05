@@ -6,7 +6,7 @@ on:
       - 'main'
 
 jobs:
-  build_and_tag:
+  build_action:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,6 +37,14 @@ jobs:
           git config --global user.email 'azure-image-builder-bot@users.noreply.github.com'
           git commit -am "Auto Build GH Action"
           git push
+          
+  tag_new_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.7
