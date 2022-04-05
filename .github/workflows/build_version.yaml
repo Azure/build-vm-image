@@ -24,7 +24,7 @@ jobs:
           npm install
           npm i -g @vercel/ncc
 
-          ncc build index.js --license LICENSE
+          ncc build lib/index.js --license LICENSE
 
       - name: Check for modified files
         id: git-check
