@@ -162,8 +162,9 @@ export default class ImageBuilderClient {
         return output;
     }
 
-    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes: number = -1, templateName: string = "", subscriptionId: string = ""): Promise<WebResponse> {
-        timeoutInMinutes = timeoutInMinutes > -1 ? timeoutInMinutes : 0;
+    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes?: number, templateName: string = "", subscriptionId: string = ""): Promise<WebResponse> {
+        var longRunningOperationRetryTimeout = !!timeoutInMinutes ? timeoutInMinutes : 0;
+        timeoutInMinutes = timeoutInMinutes || longRunningOperationRetryTimeout;
         var timeout = new Date().getTime() + timeoutInMinutes * 60 * 1000;
         var waitIndefinitely = timeoutInMinutes == 0;
         var requestURI = response.headers["azure-asyncoperation"] || response.headers["location"];
@@ -195,6 +196,11 @@ export default class ImageBuilderClient {
 
                         if ( running_time_minutes >= this._taskParameters.actionRunModeMinutes){
                             runTemplate_result = await this.getRunTemplate(templateName, subscriptionId).then(result=> (runTemplate_result = result))
+                            
+                            console.log(running_time_minutes)
+                            console.log(templateName)
+                            console.log(subscriptionId)
+                            console.log(runTemplate_result)
 
                             return runTemplate_result
                         }
