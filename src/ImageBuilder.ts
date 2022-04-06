@@ -129,10 +129,16 @@ export default class ImageBuilder {
                 core.setOutput('templateName', this.templateName);
                 core.setOutput('templateId', templateID);
                 core.setOutput('run-output-name', runOutputName);
-                if (out) {
+                if ((out && this._taskParameters.actionRunMode === "full") || this._taskParameters.actionRunMode !== "full") {
                     core.setOutput('custom-image-uri', out);
-                    core.setOutput('imagebuilder-run-status', "succeeded");
-                    imagebuilderRunStatus = "succeeded";
+                    if(out){
+                        core.setOutput('imagebuilder-run-status', "succeeded");
+                        imagebuilderRunStatus = "succeeded";
+                    }
+                    else{
+                        core.setOutput('imagebuilder-run-status', "skipped");
+                        imagebuilderRunStatus = "skipped";
+                    }
                 }
             }
             else{
@@ -166,8 +172,8 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
-                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" || this._taskParameters.actionRunMode == "buildonly")){
-                    console.log("skipping cleanup action run mode set to nowait or buildonly")
+                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" )){
+                    console.log("skipping cleanup action run mode set to nowait")
                     return
                 }
                 this.cleanup(subscriptionId);

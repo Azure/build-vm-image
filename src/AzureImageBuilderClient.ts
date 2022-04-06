@@ -10,10 +10,12 @@ export default class ImageBuilderClient {
 
     private _client: AzureRestClient;
     private _taskParameters: TaskParameters;
+    private _template_run_complete: boolean;
 
     constructor(resourceAuthorizer: IAuthorizer, taskParameters: TaskParameters) {
         this._client = new AzureRestClient(resourceAuthorizer);
         this._taskParameters = taskParameters;
+        this._template_run_complete = false;
     }
 
     public async getTemplateId(templateName: string, subscriptionId: string): Promise<string> {
@@ -47,7 +49,7 @@ export default class ImageBuilderClient {
         try {
             var response = await this._client.beginRequest(httpRequest);
             if (response.statusCode == 201) {
-                response = await this.getLongRunningOperationResult(response);
+                response = await this.getLongRunningOperationResult('putImageTemplate', response);
             }
             if (response.statusCode != 200 || response.body.status == "Failed") {
                 throw ToError(response);
@@ -69,7 +71,7 @@ export default class ImageBuilderClient {
             var response = await this._client.beginRequest(httpRequest);
 
             if (response.statusCode == 202) {
-                response = await this.getLongRunningOperationResult(response);
+                response = await this.getLongRunningOperationResult('getRunTemplate', response);
             }
             if (response.statusCode != 200 || response.body.status == "Failed") {
                 throw ToError(response);
@@ -98,7 +100,7 @@ export default class ImageBuilderClient {
                     console.log("Action Run Mode set to NoWait. Skipping wait\n");
                     return
                 }
-                response = await this.getLongRunningOperationResult(response, timeOutInMinutes, templateName, subscriptionId);
+                response = await this.getLongRunningOperationResult('runTemplate', response, timeOutInMinutes, templateName, subscriptionId);
             }
             if (response.statusCode != 200 || response.body.status == "Failed") {
                 throw ToError(response);
@@ -121,7 +123,7 @@ export default class ImageBuilderClient {
             };
             var response = await this._client.beginRequest(httpRequest);
             if (response.statusCode == 202) {
-                response = await this.getLongRunningOperationResult(response);
+                response = await this.getLongRunningOperationResult('deleteTemplate', response);
             }
             if (response.statusCode != 200 || response.body.status == "Failed") {
                 throw ToError(response);
@@ -138,6 +140,9 @@ export default class ImageBuilderClient {
 
 
     public async getRunOutput(templateName: string, runOutput: string, subscriptionId: string): Promise<string> {
+        if (!this._template_run_complete && this._taskParameters.actionRunMode != "full"){
+            return ""
+        }
         let httpRequest: WebRequest = {
             method: 'GET',
             uri: this._client.getRequestUri(`/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.VirtualMachineImages/imagetemplates/{imageTemplateName}/runOutputs/{runOutput}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{imageTemplateName}': templateName, '{runOutput}': runOutput }, [], apiVersion)
@@ -162,7 +167,7 @@ export default class ImageBuilderClient {
         return output;
     }
 
-    public async getLongRunningOperationResult(response: WebResponse, timeoutInMinutes?: number, templateName: string = "", subscriptionId: string = ""): Promise<WebResponse> {
+    public async getLongRunningOperationResult(action: string, response: WebResponse, timeoutInMinutes?: number, templateName: string = "", subscriptionId: string = ""): Promise<WebResponse> {
         var longRunningOperationRetryTimeout = !!timeoutInMinutes ? timeoutInMinutes : 0;
         timeoutInMinutes = timeoutInMinutes || longRunningOperationRetryTimeout;
         var timeout = new Date().getTime() + timeoutInMinutes * 60 * 1000;
@@ -187,7 +192,7 @@ export default class ImageBuilderClient {
                 if (!waitIndefinitely && timeout < new Date().getTime()) {
                     throw Error(`error in url`);
                 }
-                if ( this._taskParameters.actionRunMode != "full" && (templateName && templateName != "") && (subscriptionId && subscriptionId != "") ) {
+                if ( action == "runTemplate" &&  this._taskParameters.actionRunMode != "full" && (templateName && templateName != "") && (subscriptionId && subscriptionId != "") ) {
                     let runTemplate_result = null
                     if ( this._taskParameters.actionRunMode == "custom" ){
                         let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
@@ -226,6 +231,9 @@ export default class ImageBuilderClient {
                 var sleepDuration = 15;
                 await this.sleepFor(sleepDuration);
             } else {
+                if (action == "runTemplate" && response.statusCode === 200){
+                    this._template_run_complete = true
+                }
                 break;
             }
         }
