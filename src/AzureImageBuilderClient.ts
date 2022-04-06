@@ -17,6 +17,9 @@ export default class ImageBuilderClient {
         this._taskParameters = taskParameters;
         this._template_run_complete = false;
     }
+    public getTemplateRunComplete(): boolean {
+        return this._template_run_complete 
+    }
 
     public async getTemplateId(templateName: string, subscriptionId: string): Promise<string> {
         let httpRequest: WebRequest = {

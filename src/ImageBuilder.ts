@@ -403,6 +403,12 @@ export default class ImageBuilder {
             }
 
             if (storageAccountExists && this._taskParameters.actionRunMode != "nowait") {
+                if ( !this._aibClient.getTemplateRunComplete() && this._taskParameters.actionRunMode == "custom" ){
+                    let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
+                    if ( running_time_minutes >= 5 ){
+                        return 
+                    }
+                }
                 let httpRequest: WebRequest = {
                     method: 'DELETE',
                     uri: this._client.getRequestUri(`subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{storageAccount}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{storageAccount}': this.storageAccount }, [], "2019-06-01")
