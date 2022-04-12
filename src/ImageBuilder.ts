@@ -405,7 +405,7 @@ export default class ImageBuilder {
             if (storageAccountExists && this._taskParameters.actionRunMode != "nowait") {
                 if ( !this._aibClient.getTemplateRunComplete() && this._taskParameters.actionRunMode == "custom" ){
                     let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
-                    if ( running_time_minutes >= 5 ){
+                    if ( running_time_minutes <= 5 ){
                         return 
                     }
                 }
