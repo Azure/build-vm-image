@@ -402,8 +402,8 @@ export default class ImageBuilder {
                 console.log(`${this.templateName} got deleted`);
             }
 
-            if (storageAccountExists && this._taskParameters.actionRunMode != "nowait") {
-                if ( !this._aibClient.getTemplateRunComplete() && this._taskParameters.actionRunMode == "custom" ){
+            if (storageAccountExists && this._taskParameters.actionRunMode != "nowait" && this._taskParameters.deleteStorage != "no") {
+                if ( this._taskParameters.deleteStorage != "yes" && (!this._aibClient.getTemplateRunComplete() && this._taskParameters.actionRunMode == "custom" )){
                     let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
                     if ( running_time_minutes <= 5 ){
                         return 

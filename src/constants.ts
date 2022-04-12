@@ -1,5 +1,6 @@
 export var ActionRunMode = "action-run-mode";
 export var ActionRunModeTimeMinutes = "action-run-mode-time-minutes";
+export var DeleteStorage = "delete-storage";
 export var Location = "location";
 export var ResourceGroupName = "resource-group-name";
 export var ImageBuilderTemplateName = "image-builder-template-name";
