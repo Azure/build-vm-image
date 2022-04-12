@@ -10,6 +10,12 @@ inputs:
       description: 'If action-run-mode is custom, how long should action run'
       required: false
       default: 30
+      
+   #storage inputs   
+   delete-storage:
+      description: 'A storage account is created so that the build artifacts can be downloaded. The options are: yes, no, auto.'
+      required: false
+      default: auto  
 
    #general inputs
    location:

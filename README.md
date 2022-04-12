@@ -54,10 +54,20 @@ Learn more about configuring permissions for Azure Image builder Service using [
     * This requires action-run-mode-time-minutes
     * This will allow you to specify a max wait time 
 
-* `action-run-mode-time-minutes`: Optional. Only applies if action-run-mode is set to Custom. This allows you to specify the length in minutes to run
+* `action-run-mode-time-minutes`: Optional. Only applies if action-run-mode is set to Custom. This allows you to specify the length in minutes to run.
   * Default 30 minutes
   * If over 10 minutes the created storage account created for the build artifacts will be deleted as part of the cleanup
   * If Set to 0 will run and set the Actuib Run Mode to Full
+  * if greater than 0 and less than 5 it will be defaulted to 5 minutes.
+
+* `delete-storage`: Optional. A storage account is created so that the build artifacts can be downloaded. This indicatates how teh deletion of the storage shoudl happen.
+  * auto
+    * default
+    * The systemll decied if its ok to delete the storage 
+  * No
+    * The system will not delete the storage
+  * Yes
+    * The system will always delete the storage.
 
 * `resource-group-name`: Required. This is the resource group where the action creates a storage for saving artifacts needed for customized image.  Azure image builder also uses the same resource group for Image Template creation. 
 

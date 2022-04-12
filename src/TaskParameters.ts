@@ -11,6 +11,9 @@ export default class TaskParameters {
     public actionRunModeMinutes: number = 30;
     public actionStartTime: Date = new Date();
 
+    // storage inputs
+    public deleteStorage = "auto";
+
     // image builder inputs
     public resourceGroupName: string = "";
     public location: string = "";
@@ -71,10 +74,17 @@ export default class TaskParameters {
             this.actionRunMode = "full"
         }
 
+        if (this.actionRunModeMinutes > 0 && this.actionRunModeMinutes < 5){
+            this.actionRunModeMinutes = 5
+        }
+
         console.log(`Action run mode set: ${this.actionRunMode}`)
         if (this.actionRunMode == "custom"){
             console.log(`Action run mode time set: ${this.actionRunModeMinutes}`)
         }
+
+        this.deleteStorage = tl.getInput(constants.DeleteStorage).toLowerCase();
+        console.log(`Delete Storage action: ${this.deleteStorage}`);
 
         this.imagebuilderTemplateName = tl.getInput(constants.ImageBuilderTemplateName);
         if (this.imagebuilderTemplateName.indexOf(".json") > -1) {
