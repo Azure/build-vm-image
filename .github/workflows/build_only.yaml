@@ -35,6 +35,7 @@ jobs:
         id: git-check
         run: echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
 
+      # origin HEAD:${{ github.base_ref }} is needed on push because this is a PR
       - name: Commit Build file changes
         if: steps.git-check.outputs.modified == 'true'
         run: |
