@@ -40,7 +40,7 @@ jobs:
       - name: Commit Build file changes
         if: steps.git-check.outputs.modified == 'true'
         run: |
-          git pull origin HEAD:${{ github.head_ref }}
+          git pull origin HEAD:${{ github.head_ref }} --ff-only
           git config --global user.name 'Azure Image Builder Bot'
           git config --global user.email 'azure-image-builder-bot@users.noreply.github.com'
           git commit -am "Auto Build GH Action"
