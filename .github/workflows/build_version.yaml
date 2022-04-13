@@ -1,0 +1,75 @@
+name: Build and Update Version Tag
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  build_action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+
+      - name: 'Install required packages'
+        shell: bash
+        run: |
+          cd ${{ GITHUB.WORKSPACE }}/
+          npm install
+          npm i -g @vercel/ncc
+
+      - name: 'Build Project'
+        shell: bash
+        run: |
+          ncc build lib/index.js --license LICENSE
+
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
+
+      - name: Commit Build file changes
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --global user.name 'Azure Image Builder Bot'
+          git config --global user.email 'azure-image-builder-bot@users.noreply.github.com'
+          git commit -am "Auto Build GH Action"
+          git push
+          
+  tag_new_version:
+    runs-on: ubuntu-latest
+    needs: build_action
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: '5.x'
+      
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.7
+      
+      - name: Display SemVer
+        run: |
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+      
+      - name: Create Git tag for PR
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/v${{ steps.gitversion.outputs.semVer }}",
+              sha: context.sha
+            })
