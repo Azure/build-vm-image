@@ -35,10 +35,12 @@ jobs:
         id: git-check
         run: echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
 
+      # git pull is needed on push because this is a PR
       # origin HEAD:${{ github.base_ref }} is needed on push because this is a PR
       - name: Commit Build file changes
         if: steps.git-check.outputs.modified == 'true'
         run: |
+          git pull origin HEAD:${{ github.base_ref }}
           git config --global user.name 'Azure Image Builder Bot'
           git config --global user.email 'azure-image-builder-bot@users.noreply.github.com'
           git commit -am "Auto Build GH Action"
