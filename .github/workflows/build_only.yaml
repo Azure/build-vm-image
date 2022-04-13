@@ -1,9 +1,10 @@
-name: Build and Update Version Tag
+name: Build system to single file
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'main'
+      - main
+  workflow_dispatch:
 
 jobs:
   build_action:
@@ -27,6 +28,7 @@ jobs:
       - name: 'Build Project'
         shell: bash
         run: |
+          cd ${{ GITHUB.WORKSPACE }}/
           ncc build lib/index.js --license LICENSE
 
       - name: Check for modified files
@@ -41,35 +43,3 @@ jobs:
           git commit -am "Auto Build GH Action"
           git push
           
-  tag_new_version:
-    runs-on: ubuntu-latest
-    needs: build_action
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.7
-        with:
-          versionSpec: '5.x'
-      
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.7
-      
-      - name: Display SemVer
-        run: |
-          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
-      
-      - name: Create Git tag for PR
-        uses: actions/github-script@v5
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/v${{ steps.gitversion.outputs.semVer }}",
-              sha: context.sha
-            })
