@@ -401,7 +401,8 @@ export default class ImageBuilder {
                 await this._aibClient.deleteTemplate(this.templateName, subscriptionId);
                 console.log(`${this.templateName} got deleted`);
             }
-
+            
+            let storageAccountDeleted = false
             if (storageAccountExists && this._taskParameters.actionRunMode != "nowait" && this._taskParameters.deleteStorage != "no") {
                 if ( this._taskParameters.deleteStorage != "yes" && (!this._aibClient.getTemplateRunComplete() && this._taskParameters.actionRunMode == "custom" )){
                     let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
@@ -414,7 +415,12 @@ export default class ImageBuilder {
                     uri: this._client.getRequestUri(`subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{storageAccount}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{storageAccount}': this.storageAccount }, [], "2019-06-01")
                 };
                 var response = await this._client.beginRequest(httpRequest);
+                storageAccountDeleted = true
                 console.log("storage account " + this.storageAccount + " deleted");
+            }
+
+            if ( !storageAccountDeleted ){
+                console.log("storage account " + this.storageAccount + " NOT deleted");
             }
         }
         catch (error) {
