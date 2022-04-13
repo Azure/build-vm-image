@@ -1,4 +1,4 @@
-name: Build and Update Version Tag
+name: Update Version Tag
 
 on:
   push:

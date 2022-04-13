@@ -1,4 +1,4 @@
-name: Build and Update Version Tag
+name: Build system to single file
 
 on:
   pull_request:
