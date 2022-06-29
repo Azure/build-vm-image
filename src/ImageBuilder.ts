@@ -129,10 +129,16 @@ export default class ImageBuilder {
                 core.setOutput('templateName', this.templateName);
                 core.setOutput('templateId', templateID);
                 core.setOutput('run-output-name', runOutputName);
-                if (out) {
+                if ((out && this._taskParameters.actionRunMode === "full") || this._taskParameters.actionRunMode !== "full") {
                     core.setOutput('custom-image-uri', out);
-                    core.setOutput('imagebuilder-run-status', "succeeded");
-                    imagebuilderRunStatus = "succeeded";
+                    if(out){
+                        core.setOutput('imagebuilder-run-status', "succeeded");
+                        imagebuilderRunStatus = "succeeded";
+                    }
+                    else{
+                        core.setOutput('imagebuilder-run-status', "skipped");
+                        imagebuilderRunStatus = "skipped";
+                    }
                 }
             }
             else{
@@ -166,8 +172,8 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
-                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" || this._taskParameters.actionRunMode == "buildonly")){
-                    console.log("skipping cleanup action run mode set to nowait or buildonly")
+                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" )){
+                    console.log("skipping cleanup action run mode set to nowait")
                     return
                 }
                 this.cleanup(subscriptionId);
@@ -395,14 +401,26 @@ export default class ImageBuilder {
                 await this._aibClient.deleteTemplate(this.templateName, subscriptionId);
                 console.log(`${this.templateName} got deleted`);
             }
-
-            if (storageAccountExists && this._taskParameters.actionRunMode != "nowait") {
+            
+            let storageAccountDeleted = false
+            if (storageAccountExists && this._taskParameters.actionRunMode != "nowait" && this._taskParameters.deleteStorage != "no") {
+                if ( this._taskParameters.deleteStorage != "yes" && (!this._aibClient.getTemplateRunComplete() && this._taskParameters.actionRunMode == "custom" )){
+                    let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
+                    if ( running_time_minutes <= 5 ){
+                        return 
+                    }
+                }
                 let httpRequest: WebRequest = {
                     method: 'DELETE',
                     uri: this._client.getRequestUri(`subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{storageAccount}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{storageAccount}': this.storageAccount }, [], "2019-06-01")
                 };
                 var response = await this._client.beginRequest(httpRequest);
+                storageAccountDeleted = true
                 console.log("storage account " + this.storageAccount + " deleted");
+            }
+
+            if ( !storageAccountDeleted ){
+                console.log("storage account " + this.storageAccount + " NOT deleted");
             }
         }
         catch (error) {
