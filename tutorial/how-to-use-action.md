@@ -1,6 +1,6 @@
-# Deploying Immutable Infratructure gets easier with Build Azure Virtual Machine Image Action
+# Deploying Immutable Infrastructure gets easier with Build Azure Virtual Machine Image Action
 
-In a traditional mutable infrastrucuture, virtual machines are constantly updated for configuration changes, software installations, security hardening etc. It is a usual practice for developers or sysops teams to SSH into their virtual machines and install packages manually or run scripts. In other terms, the Virtual machine mutates regularly from its original state. 
+In a traditional mutable infrastructure, virtual machines are constantly updated for configuration changes, software installations, security hardening etc. It is a usual practice for developers or sysops teams to SSH into their virtual machines and install packages manually or run scripts. In other terms, the Virtual machine mutates regularly from its original state. 
 
 As organizations mature, the number of virtual machines increases and the need for automation  arises in order to achieve consistency across machines. However, even with automation there are situations where a run fails or behaves slightly differently on a particular machine because of an events like network failure, OS update failure, installation retries etc. When seen across hundreds of virtual machines and across multiple updates, each virtual machine can behave slightly differnt from the rest. This leads to inconsistency, unreliability and errors that are unique per virtual machine.
 
