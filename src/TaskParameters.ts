@@ -6,6 +6,17 @@ import Utils from "./Utils";
 var fs = require('fs');
 
 export default class TaskParameters {
+    // action inputs
+    public actionRunMode: string = "";
+    public actionRunModeMinutes: number = 30;
+    public actionStartTime: Date = new Date();
+
+<<<<<<< HEAD
+=======
+    // storage inputs
+    public deleteStorage = "auto";
+
+>>>>>>> tiki_main_forked
     // image builder inputs
     public resourceGroupName: string = "";
     public location: string = "";
@@ -47,9 +58,36 @@ export default class TaskParameters {
     public distImageTags: string = "";
 
     constructor() {
-        var locations = ["eastus", "eastus2", "westcentralus", "westus", "westus2", "southcentralus", "northeurope", "westeurope", "southeastasia", "australiasoutheast", "australia", "uksouth", "ukwest" ];
+        var locations = ["eastus", "eastus2", "westcentralus", "westus", "westus2", "westus3", "southcentralus", "northeurope", "westeurope", "southeastasia", "australiasoutheast", "australiaeast", "uksouth", "ukwest" ];
+        var actionRunModeOptions = ["full", "buildonly", "nowait", "custom"]
 
         console.log("start reading task parameters...");
+
+        this.actionRunMode = tl.getInput(constants.ActionRunMode).toLowerCase();
+        if (!this.actionRunMode){
+            this.actionRunMode = "full"
+        }
+        if (!(actionRunModeOptions.indexOf(this.actionRunMode) > -1)) {
+            throw new Error("action run mode not from available options: full, buildonly, nowait, custom");
+        }
+
+        this.actionRunModeMinutes = parseInt(tl.getInput(constants.ActionRunModeTimeMinutes));
+        if ( this.actionRunMode == "custom" && this.actionRunModeMinutes == 0 ){
+            console.log(`Action run mode set to full, custom minutes was set as 0"`)
+            this.actionRunMode = "full"
+        }
+
+        if (this.actionRunModeMinutes > 0 && this.actionRunModeMinutes < 5){
+            this.actionRunModeMinutes = 5
+        }
+
+        console.log(`Action run mode set: ${this.actionRunMode}`)
+        if (this.actionRunMode == "custom"){
+            console.log(`Action run mode time set: ${this.actionRunModeMinutes}`)
+        }
+
+        this.deleteStorage = tl.getInput(constants.DeleteStorage).toLowerCase();
+        console.log(`Delete Storage action: ${this.deleteStorage}`);
 
         this.imagebuilderTemplateName = tl.getInput(constants.ImageBuilderTemplateName);
         if (this.imagebuilderTemplateName.indexOf(".json") > -1) {
@@ -59,6 +97,7 @@ export default class TaskParameters {
         }
 
         this.resourceGroupName = tl.getInput(constants.ResourceGroupName, { required: true });
+
         this.buildTimeoutInMinutes = parseInt(tl.getInput(constants.BuildTimeoutInMinutes));
         this.sourceOSType = tl.getInput(constants.SourceOSType, { required: true });
         if (Utils.IsEqual(this.sourceOSType, "windows")) {

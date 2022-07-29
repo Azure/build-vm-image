@@ -41,6 +41,34 @@ Learn more about configuring permissions for Azure Image builder Service using [
 
 # Inputs for the Action
 
+* `action-run-mode`: Optional. This is the run mode for the action. The options are
+  * Full
+    * default
+    * Wait until everything completes
+  * BuildOnly
+    * Waits until the template starts the distribute process
+  * NoWait
+    * This will not wait for actions to complete, like run template
+    * It will try to get the action to complete the quicket but can require the most manual cleanup
+  * Custom
+    * This requires action-run-mode-time-minutes
+    * This will allow you to specify a max wait time 
+
+* `action-run-mode-time-minutes`: Optional. Only applies if action-run-mode is set to Custom. This allows you to specify the length in minutes to run.
+  * Default 30 minutes
+  * If over 10 minutes the created storage account created for the build artifacts will be deleted as part of the cleanup
+  * If Set to 0 will run and set the Actuib Run Mode to Full
+  * if greater than 0 and less than 5 it will be defaulted to 5 minutes.
+
+* `delete-storage`: Optional. A storage account is created so that the build artifacts can be downloaded. This indicatates how teh deletion of the storage shoudl happen.
+  * auto
+    * default
+    * The systemll decied if its ok to delete the storage 
+  * No
+    * The system will not delete the storage
+  * Yes
+    * The system will always delete the storage.
+
 * `resource-group-name`: Required. This is the resource group where the action creates a storage for saving artifacts needed for customized image.  Azure image builder also uses the same resource group for Image Template creation. 
 
 * `image-builder-template-name`:  The name of the image builder template resource to be used for creating and running the Image builder service. If you already have an [AIB Template file](https://github.com/danielsollondon/azvmimagebuilder/tree/master/quickquickstarts) downloaded in the runner, then you can give the full filepath to that as well. E.g. _${{ GITHUB.WORKSPACE }}/vmImageTemplate/ubuntuCustomVM.json_. Note that incase a filepath is provided in this action input, then parameters in the file will take precedence over action inputs. Irrespective, customizer section of action is always executed. 

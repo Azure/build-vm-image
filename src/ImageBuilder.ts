@@ -49,6 +49,7 @@ export default class ImageBuilder {
     }
 
     async execute() {
+        imagebuilderRunStatus = ""
         try {
             azPath = await io.which("az", true);
             core.debug("Az module path: " + azPath);
@@ -78,7 +79,10 @@ export default class ImageBuilder {
             else {
                 var template = JSON.parse(this._taskParameters.templateJsonFromUser);
                 this._taskParameters.location = template.location;
-            }
+            }            
+                
+            this.templateName = this.getTemplateName();
+            var runOutputName = this.getRunoutputName();
 
             console.log("Using Managed Identity " + this.idenityName);
             var blobUrl = "";
@@ -116,18 +120,34 @@ export default class ImageBuilder {
             await this._aibClient.putImageTemplate(templateStr, this.templateName, subscriptionId);
             this.imgBuilderTemplateExists = true;
 
-            await this._aibClient.runTemplate(this.templateName, subscriptionId, this._taskParameters.buildTimeoutInMinutes);
-            var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
+            await this._aibClient.runTemplate(this.templateName, subscriptionId,  this._taskParameters.buildTimeoutInMinutes);
             var templateID = await this._aibClient.getTemplateId(this.templateName, subscriptionId);
-            var imagebuilderRunStatus = "failed";
-            core.setOutput('templateName', this.templateName);
-            core.setOutput('templateId', templateID);
-            core.setOutput('run-output-name', runOutputName);
-            if (out) {
-                core.setOutput('custom-image-uri', out);
-                core.setOutput('imagebuilder-run-status', "succeeded");
-                imagebuilderRunStatus = "succeeded";
+
+            if (this._taskParameters.actionRunMode !== "nowait"){
+                var out = await this._aibClient.getRunOutput(this.templateName, runOutputName, subscriptionId);
+                var imagebuilderRunStatus = "failed";
+                core.setOutput('templateName', this.templateName);
+                core.setOutput('templateId', templateID);
+                core.setOutput('run-output-name', runOutputName);
+                if ((out && this._taskParameters.actionRunMode === "full") || this._taskParameters.actionRunMode !== "full") {
+                    core.setOutput('custom-image-uri', out);
+                    if(out){
+                        core.setOutput('imagebuilder-run-status', "succeeded");
+                        imagebuilderRunStatus = "succeeded";
+                    }
+                    else{
+                        core.setOutput('imagebuilder-run-status', "skipped");
+                        imagebuilderRunStatus = "skipped";
+                    }
+                }
             }
+            else{
+                out = ""
+                core.setOutput('custom-image-uri', out);
+                core.setOutput('imagebuilder-run-status', "skipped");
+                imagebuilderRunStatus = "skipped";
+            }
+            
 
             if (Utils.IsEqual(templateJson.properties.source.type, "PlatformImage")) {
                 core.setOutput('pirPublisher', templateJson.properties.source.publisher);
@@ -152,6 +172,10 @@ export default class ImageBuilder {
         finally {
             var outStream = await this.executeAzCliCommand(`group exists -n ${this._taskParameters.resourceGroupName}`);
             if (outStream) {
+                if (imagebuilderRunStatus != "failed" && (this._taskParameters.actionRunMode == "nowait" )){
+                    console.log("skipping cleanup action run mode set to nowait")
+                    return
+                }
                 this.cleanup(subscriptionId);
             }
         }
@@ -373,18 +397,30 @@ export default class ImageBuilder {
 
     private async cleanup(subscriptionId: string) {
         try {
-            if (!this.isVhdDistribute && this.imgBuilderTemplateExists) {
+            if (!this.isVhdDistribute && this.imgBuilderTemplateExists && this._taskParameters.actionRunMode == "full") {
                 await this._aibClient.deleteTemplate(this.templateName, subscriptionId);
                 console.log(`${this.templateName} got deleted`);
             }
-
-            if (storageAccountExists) {
+            
+            let storageAccountDeleted = false
+            if (storageAccountExists && this._taskParameters.actionRunMode != "nowait" && this._taskParameters.deleteStorage != "no") {
+                if ( this._taskParameters.deleteStorage != "yes" && (!this._aibClient.getTemplateRunComplete() && this._taskParameters.actionRunMode == "custom" )){
+                    let running_time_minutes = Math.floor(((new Date()).getTime() - this._taskParameters.actionStartTime.getTime()) / 1000 / 60);
+                    if ( running_time_minutes <= 5 ){
+                        return 
+                    }
+                }
                 let httpRequest: WebRequest = {
                     method: 'DELETE',
                     uri: this._client.getRequestUri(`subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{storageAccount}`, { '{subscriptionId}': subscriptionId, '{resourceGroupName}': this._taskParameters.resourceGroupName, '{storageAccount}': this.storageAccount }, [], "2019-06-01")
                 };
                 var response = await this._client.beginRequest(httpRequest);
+                storageAccountDeleted = true
                 console.log("storage account " + this.storageAccount + " deleted");
+            }
+
+            if ( !storageAccountDeleted ){
+                console.log("storage account " + this.storageAccount + " NOT deleted");
             }
         }
         catch (error) {

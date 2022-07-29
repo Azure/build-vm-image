@@ -29,9 +29,8 @@
     "azure-storage": "^2.10.3",
     "eslint": "^5.16.0",
     "jszip": "^3.5.0",
-    "tar.gz": "^1.0.7",
+    "tar": "^6.1.11",
     "typescript": "^3.9.7",
     "zip-lib": "^0.7.1"
-  },
-  "devDependencies": {}
+  }
 }

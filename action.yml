@@ -1,6 +1,22 @@
 name: "Build Azure Virtual Machine Image"
 description: "Create custom virtual machine images that contain artifacts built in CI workflows" 
 inputs:
+   #action inputs   
+   action-run-mode:
+      description: 'The run mode for the action. Full (default) wait until everything completes, BuildOnly waits until the template starts the didistribute stro process, NoWait as soon as the action sets up and triggers the action it will quit'
+      required: false
+      default: full  
+   action-run-mode-time-minutes:
+      description: 'If action-run-mode is custom, how long should action run'
+      required: false
+      default: 30
+      
+   #storage inputs   
+   delete-storage:
+      description: 'A storage account is created so that the build artifacts can be downloaded. The options are: yes, no, auto.'
+      required: false
+      default: auto  
+
    #general inputs
    location:
       description: 'This is the Azure region in which the Image Builder will run.'
@@ -60,4 +76,4 @@ outputs:
 
 runs:
    using: 'node12'
-   main: 'lib/index.js'
+   main: 'dist/index.js'
