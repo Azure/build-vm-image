@@ -1,5 +1,5 @@
 name: "Build Azure Virtual Machine Image"
-description: "Create custom virtual machine images that contain artifacts built in CI workflows" 
+description: "Create custom virtual machine images that contain artifacts built in CI workflows"
 inputs:
    #general inputs
    location:
@@ -17,17 +17,17 @@ inputs:
       default: 'Standard_D1_v2'
    managed-identity:
       description: 'The identity that will be used to do the role assignment and resource creation'
-   
+
    #source inputs
    source-image-type:
       description: '[ PlatformImage | SharedImageGallery | ManagedImage ]'
       default: 'PlatformImage'
-   source-os-type: 
+   source-os-type:
       description: 'OS types supported: [ linux | windows ].'
       required: true
    source-image:
       description: 'Value of source-image supported by Azure Image Builder.'
-      
+
    #customization inouts
    customizer-source:
       description: 'This takes the path to a directory or a file in the runner. By default, it points to the default download directory of the github runner.'
@@ -36,7 +36,7 @@ inputs:
    customizer-windows-update:
       description: 'The value is boolean and set to false by default. This value is for Windows images only, the image builder will run Windows Update at the end of the customizations and also handle the reboots it requires.'
       default: false
-     
+
    #distribution inputs
    dist-type:
       description: 'ManagedImage | SharedImageGallery | VHD'
@@ -59,5 +59,5 @@ outputs:
       description: 'Upon successful completion, The github action emits the URI or resource id of the Image distributed.'
 
 runs:
-   using: 'node12'
+   using: 'node16'
    main: 'lib/index.js'
